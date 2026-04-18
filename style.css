@@ -1,4 +1,4 @@
-
+/* Core Variables & Neon Theme */
 :root {
     --bg-dark: #07090f;
     --card-bg: rgba(15, 20, 30, 0.6);
@@ -20,13 +20,16 @@ body {
     min-height: 100vh;
 }
 
+/* Layout Utilities */
 .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 .align-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; }
 .hidden { display: none !important; }
 
+/* Neon Typography Effects */
 .neon-text { font-size: 3.5rem; color: #fff; text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue); font-weight: 600; }
 .neon-text-small { font-size: 1.8rem; color: #fff; text-shadow: 0 0 5px var(--neon-blue), 0 0 15px var(--neon-blue); }
 
+/* Glassmorphism Cards */
 .glass-card {
     background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 25px;
@@ -34,12 +37,15 @@ body {
 }
 .auth-card { width: 100%; max-width: 420px; text-align: center; border-top: 2px solid var(--neon-blue); }
 
+/* Music Player Widget */
 .neon-player { position: fixed; top: 20px; right: 20px; z-index: 100; padding: 10px 20px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--neon-pink); box-shadow: 0 0 15px rgba(255,0,127,0.4); border-radius: 30px; }
 
+/* Input Fields */
 input, textarea, select { width: 100%; padding: 14px; margin-bottom: 15px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; border-radius: 10px; outline: none; transition: 0.3s; }
 input:focus, textarea:focus, select:focus { border-color: var(--neon-blue); box-shadow: 0 0 12px rgba(0,243,255,0.3); }
 select option { background: var(--bg-dark); }
 
+/* Premium Buttons */
 button { width: 100%; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; border: none; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
 .btn-neon { background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); }
 .btn-neon:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 25px var(--neon-blue); transform: translateY(-2px); }
@@ -50,19 +56,23 @@ button { width: 100%; padding: 14px; border-radius: 10px; font-weight: 600; curs
 .btn-outline:hover { background: rgba(255,255,255,0.1); }
 .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); width: auto; padding: 8px 20px; border-radius: 20px; }
 
+/* Dashboard Grid Layout */
 .dashboard-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
 .dashboard-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 25px; }
 @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .neon-player { bottom: 20px; top: auto; left: 20px; } }
 
+/* Profile Avatar Glowing Effects */
 .avatar-wrapper { position: relative; width: 110px; margin: 0 auto 20px; text-align: center; }
 .avatar-glow { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid var(--neon-purple); box-shadow: 0 0 20px rgba(181, 55, 242, 0.6); }
 .upload-label { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); background: var(--neon-purple); color: #fff; padding: 4px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; box-shadow: 0 0 10px rgba(181, 55, 242, 0.5); }
 
+/* Feed Scrollbars */
 .feed-scroll { max-height: 550px; overflow-y: auto; padding-right: 10px; }
 .dm-scroll { max-height: 300px; }
 .feed-scroll::-webkit-scrollbar { width: 6px; }
 .feed-scroll::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
 
+/* Message Items */
 .message-item { background: rgba(0,0,0,0.4); border-left: 4px solid var(--neon-blue); padding: 18px; margin-bottom: 15px; border-radius: 0 10px 10px 0; transition: 0.3s; }
 .message-item:hover { transform: translateX(5px); background: rgba(0,243,255,0.05); }
 .dm-item { border-left: 4px solid var(--neon-purple); background: rgba(181,55,242,0.08); }
@@ -70,13 +80,16 @@ button { width: 100%; padding: 14px; border-radius: 10px; font-weight: 600; curs
 .message-header { font-size: 0.85rem; color: var(--neon-blue); margin-bottom: 10px; display: flex; justify-content: space-between; }
 .dm-item .message-header { color: var(--neon-purple); }
 
+/* Interactions */
 .like-btn { background: transparent; border: none; color: var(--neon-pink); cursor: pointer; font-size: 14px; margin-top: 15px; text-align: left; width: auto; padding: 0; font-weight: normal; text-transform: none; }
 .like-btn:hover { text-shadow: 0 0 15px var(--neon-pink); transform: scale(1.05); }
 
+/* Admin Analytics Dashboard */
 .admin-card { border: 1px solid var(--danger); box-shadow: 0 0 20px rgba(255, 71, 87, 0.15); }
 .admin-title { color: var(--danger); text-shadow: 0 0 10px rgba(255, 71, 87, 0.4); }
 .chart-container { width: 100%; height: 280px; margin-top: 20px; }
 
+/* Toast Notifications */
 #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
 .toast { background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid var(--neon-blue); padding: 15px 25px; border-radius: 10px; margin-top: 15px; animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: #fff; }
 @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
