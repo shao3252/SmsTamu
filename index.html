@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sms Tamu | Premium App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <div class="glass-card neon-player" id="music-player">
+        <span>🎵 Lo-Fi Vibes</span>
+        <button id="play-music-btn" class="btn-neon-small">Play</button>
+        <audio id="bg-music" loop src="mziki.mp3"></audio>
+    </div>
+
+    <section id="auth-section" class="container align-center">
+        <h1 class="neon-text">Sms Tamu</h1>
+        <p class="subtitle">Connect. Share. Vibe.</p>
+        <div class="glass-card auth-card">
+            <h2>Welcome to the Hub</h2>
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button id="login-btn" class="btn-neon">Log In</button>
+            <button id="signup-btn" class="btn-outline">Create Account</button>
+        </div>
+    </section>
+
+    <section id="dashboard-section" class="container hidden">
+        <header class="dashboard-nav">
+            <h1 class="neon-text-small">Sms Tamu</h1>
+            <button id="logout-btn" class="btn-danger">Log Out</button>
+        </header>
+
+        <div id="admin-panel" class="glass-card admin-card hidden">
+            <h2 class="admin-title">⚡ System Admin Hub</h2>
+            <p>Traffic overview and system control.</p>
+            <div class="chart-container">
+                <canvas id="analyticsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="left-panel">
+                <div class="glass-card profile-card">
+                    <h2>Your Identity</h2>
+                    <div class="avatar-wrapper">
+                        <img id="profile-img" src="https://via.placeholder.com/120" alt="Avatar" class="avatar-glow">
+                        <label for="avatar-upload" class="upload-label">Change</label>
+                        <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+                    </div>
+                    <input type="text" id="profile-name" placeholder="Display Name" class="glass-input">
+                    <textarea id="profile-bio" placeholder="Short bio..." class="glass-input"></textarea>
+                    <button id="save-profile-btn" class="btn-neon-purple">Update Identity</button>
+                </div>
+
+                <div class="glass-card dm-card">
+                    <h2>Private CommLink</h2>
+                    <select id="dm-user-select" class="glass-input">
+                        <option value="">Select an agent to message...</option>
+                    </select>
+                    <textarea id="dm-message" placeholder="Type a secure message..." class="glass-input"></textarea>
+                    <button id="send-dm-btn" class="btn-neon">Send Transmission</button>
+                    
+                    <h3 style="margin-top: 15px; font-size: 14px; color: var(--neon-purple);">Your Inbox</h3>
+                    <div id="inbox-list" class="feed-scroll dm-scroll"></div>
+                </div>
+            </div>
+
+            <div class="messaging-container">
+                <div class="glass-card compose-card">
+                    <h2>Broadcast Channel</h2>
+                    <textarea id="new-message" placeholder="What's on your mind?" class="glass-input"></textarea>
+                    <button id="post-btn" class="btn-neon">Broadcast to Public</button>
+                </div>
+
+                <div class="glass-card feed-card">
+                    <h2>Live Global Feed</h2>
+                    <div id="messages-list" class="feed-scroll">
+                        <div class="loading-spinner">Initializing global feed...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
 
