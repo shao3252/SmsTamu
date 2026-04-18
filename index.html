@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sms Tamu | Premium App</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-    <script>eruda.init();</script>
-    
-</head>
+
+    </head>
 <body>
 
     <div id="toast-container"></div>
@@ -19,7 +19,7 @@
     <div class="glass-card neon-player" id="music-player">
         <span>🎵 Lo-Fi Vibes</span>
         <button id="play-music-btn" class="btn-neon-small">Play</button>
-        <audio id="bg-music" loop src="https://drive.google.com/file/d/1CGiiN44QK9oRI7VqUlIUsN-tDcib8RMv/view?usp=drivesdk3"></audio>
+        <audio id="bg-music" loop src="https://drive.google.com/file/d/1CGiiN44QK9oRI7VqUlIUsN-tDcib8RMv/view?usp=drivesdk"></audio>
     </div>
 
     <section id="auth-section" class="container align-center">
@@ -42,7 +42,7 @@
 
         <div id="admin-panel" class="glass-card admin-card hidden">
             <h2 class="admin-title">⚡ System Admin Hub</h2>
-            <p>Traffic overview and system control.</p>
+            <p>Network traffic overview and system control.</p>
             <div class="chart-container">
                 <canvas id="analyticsChart"></canvas>
             </div>
@@ -53,12 +53,12 @@
                 <div class="glass-card profile-card">
                     <h2>Your Identity</h2>
                     <div class="avatar-wrapper">
-                        <img id="profile-img" src="https://via.placeholder.com/120" alt="Avatar" class="avatar-glow">
+                        <img id="profile-img" src="https://via.placeholder.com/120" alt="User Avatar" class="avatar-glow">
                         <label for="avatar-upload" class="upload-label">Change</label>
                         <input type="file" id="avatar-upload" accept="image/*" class="hidden">
                     </div>
                     <input type="text" id="profile-name" placeholder="Display Name" class="glass-input">
-                    <textarea id="profile-bio" placeholder="Short bio..." class="glass-input"></textarea>
+                    <textarea id="profile-bio" placeholder="Write a short bio..." class="glass-input"></textarea>
                     <button id="save-profile-btn" class="btn-neon-purple">Update Identity</button>
                 </div>
 
@@ -85,7 +85,7 @@
                 <div class="glass-card feed-card">
                     <h2>Live Global Feed</h2>
                     <div id="messages-list" class="feed-scroll">
-                        <div class="loading-spinner">Initializing global feed...</div>
+                        <div class="loading-spinner">Initializing global network...</div>
                     </div>
                 </div>
             </div>
@@ -95,4 +95,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-
