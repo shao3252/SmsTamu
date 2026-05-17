@@ -1,3 +1,5 @@
+alert("Hello! JavaScript is finally working!");
+
 // --- Language Dictionary ---
 const translations = {
     sw: {
