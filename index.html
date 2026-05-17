@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sms Tamu</title>
-    <link rel="stylesheet" href="style.css?v=1">
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("KOSA LA CODE LIMEONEKANA!\nTatizo: " + message + "\nMstari: " + lineno);
+            return true;
+        };
+    </script>
 </head>
 <body>
 
     <div class="language-switcher">
-        <button id="btn-sw" class="lang-btn active" onclick="window.setLanguage('sw')">SW</button>
-        <button id="btn-en" class="lang-btn" onclick="window.setLanguage('en')">EN</button>
+        <button id="btn-sw" class="lang-btn active" onclick="setLanguage('sw')">SW</button>
+        <button id="btn-en" class="lang-btn" onclick="setLanguage('en')">EN</button>
     </div>
 
     <div id="landing-section" class="container">
@@ -20,7 +27,7 @@
             <div class="logo-large">💖</div>
             <h1 class="brand-title" data-i18n="appName">Sms Tamu</h1>
             <p class="landing-desc" data-i18n="landingDesc">The best place for sweet and romantic messages.</p>
-            <button class="primary-btn pulse-anim" onclick="window.showAuthSection()" data-i18n="getStartedBtn">Get Started</button>
+            <button class="primary-btn pulse-anim" onclick="showAuthSection()" data-i18n="getStartedBtn">Get Started</button>
         </div>
     </div>
 
@@ -31,11 +38,11 @@
             <input type="email" id="email" placeholder="Email Address">
             <input type="password" id="password" placeholder="Password">
             
-            <button id="auth-btn" class="primary-btn" onclick="window.handleAuth()" data-i18n="loginBtn">Login</button>
+            <button id="auth-btn" class="primary-btn" onclick="handleAuth()" data-i18n="loginBtn">Login</button>
             
             <div class="auth-switch-container">
                 <span id="toggle-text" data-i18n="toggleToSignupText">Don't have an account?</span> 
-                <a href="#" class="toggle-link" onclick="window.toggleAuthMode(); return false;" id="toggle-link" data-i18n="toggleToSignupLink">Sign up here</a>
+                <a href="#" class="toggle-link" onclick="toggleAuthMode(); return false;" id="toggle-link" data-i18n="toggleToSignupLink">Sign up here</a>
             </div>
             
             <p id="auth-error" class="error-msg"></p>
@@ -43,15 +50,11 @@
     </div>
 
     <div id="main-app" class="hidden">
-        <header>
-            <h1 class="brand-title" data-i18n="appName">Sms Tamu 💖</h1>
-        </header>
+        <header><h1 class="brand-title" data-i18n="appName">Sms Tamu 💖</h1></header>
 
         <main id="content-area">
             <div id="view-home" class="view-section">
-                <div id="posts-container">
-                    <p class="temp-text" data-i18n="loadingPosts">Loading posts...</p>
-                </div>
+                <div id="posts-container"><p class="temp-text" data-i18n="loadingPosts">Loading posts...</p></div>
             </div>
 
             <div id="view-add" class="view-section hidden">
@@ -65,7 +68,7 @@
                         <option value="Mengineyo">Mengineyo</option>
                     </select>
                     <textarea id="post-content" class="custom-input" rows="5" placeholder="..."></textarea>
-                    <button id="submit-post-btn" class="primary-btn" onclick="window.submitPost()" data-i18n="postMessageBtn">Post Message</button>
+                    <button id="submit-post-btn" class="primary-btn" onclick="submitPost()" data-i18n="postMessageBtn">Post Message</button>
                 </div>
             </div>
 
@@ -73,10 +76,8 @@
                 <div class="profile-header">
                     <div class="profile-avatar-container">
                         <img id="profile-img" src="https://via.placeholder.com/150" alt="Profile" class="profile-img">
-                        <button class="edit-avatar-btn" onclick="document.getElementById('avatar-upload').click()">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                        <input type="file" id="avatar-upload" hidden accept="image/*" onchange="window.uploadAvatar(event)">
+                        <button class="edit-avatar-btn" onclick="document.getElementById('avatar-upload').click()"><i class="fas fa-camera"></i></button>
+                        <input type="file" id="avatar-upload" hidden accept="image/*" onchange="uploadAvatar(event)">
                     </div>
                     <h2 id="profile-name">User</h2>
                     <p id="profile-bio">...</p>
@@ -84,7 +85,7 @@
                         <div><strong>1</strong><br><span data-i18n="following">Following</span></div>
                         <div><strong>0</strong><br><span data-i18n="followers">Followers</span></div>
                     </div>
-                    <button class="edit-profile-btn" onclick="window.openEditProfile()" data-i18n="editProfileBtn">Edit Profile</button>
+                    <button class="edit-profile-btn" onclick="openEditProfile()" data-i18n="editProfileBtn">Edit Profile</button>
                 </div>
                 
                 <div class="profile-tabs">
@@ -92,11 +93,8 @@
                     <div class="tab" data-i18n="liked">Liked</div>
                     <div class="tab" data-i18n="saved">Saved</div>
                 </div>
-                <div id="user-posts-container" class="temp-text" data-i18n="loadingPosts">
-                    Loading your posts...
-                </div>
-                
-                <button onclick="window.logout()" class="logout-btn" style="width: 100%; margin-top: 20px;" data-i18n="logoutBtn">Logout</button>
+                <div id="user-posts-container" class="temp-text" data-i18n="loadingPosts">Loading your posts...</div>
+                <button onclick="logout()" class="logout-btn" style="width: 100%; margin-top: 20px;" data-i18n="logoutBtn">Logout</button>
             </div>
 
             <div id="edit-profile-modal" class="modal hidden">
@@ -105,8 +103,8 @@
                     <input type="text" id="edit-username" class="custom-input" placeholder="Username">
                     <textarea id="edit-bio" class="custom-input" rows="3" placeholder="Bio"></textarea>
                     <div class="modal-actions">
-                        <button onclick="window.closeEditProfile()" class="cancel-btn" data-i18n="cancelBtn">Cancel</button>
-                        <button onclick="window.saveProfile()" class="save-btn" data-i18n="saveBtn">Save</button>
+                        <button onclick="closeEditProfile()" class="cancel-btn" data-i18n="cancelBtn">Cancel</button>
+                        <button onclick="saveProfile()" class="save-btn" data-i18n="saveBtn">Save</button>
                     </div>
                 </div>
             </div>
@@ -116,28 +114,14 @@
         </main>
 
         <nav class="bottom-nav">
-            <div class="nav-item active" onclick="window.navigate('home', this)">
-                <i class="fas fa-home"></i>
-                <span data-i18n="navHome">Home</span>
-            </div>
-            <div class="nav-item" onclick="window.navigate('search', this)">
-                <i class="fas fa-search"></i>
-                <span data-i18n="navSearch">Search</span>
-            </div>
-            <div class="nav-item add-post" onclick="window.navigate('add', this)">
-                <i class="fas fa-plus"></i>
-            </div>
-            <div class="nav-item" onclick="window.navigate('chat', this)">
-                <i class="fas fa-comment-dots"></i>
-                <span data-i18n="navChat">Chat</span>
-            </div>
-            <div class="nav-item" onclick="window.navigate('profile', this)">
-                <i class="fas fa-user"></i>
-                <span data-i18n="navProfile">Profile</span>
-            </div>
+            <div class="nav-item active" onclick="navigate('home', this)"><i class="fas fa-home"></i><span data-i18n="navHome">Home</span></div>
+            <div class="nav-item" onclick="navigate('search', this)"><i class="fas fa-search"></i><span data-i18n="navSearch">Search</span></div>
+            <div class="nav-item add-post" onclick="navigate('add', this)"><i class="fas fa-plus"></i></div>
+            <div class="nav-item" onclick="navigate('chat', this)"><i class="fas fa-comment-dots"></i><span data-i18n="navChat">Chat</span></div>
+            <div class="nav-item" onclick="navigate('profile', this)"><i class="fas fa-user"></i><span data-i18n="navProfile">Profile</span></div>
         </nav>
     </div>
 
-    <script src="app.js?v=1"></script>
+    <script src="app.js?v=1000"></script>
 </body>
 </html>
