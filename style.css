@@ -169,3 +169,149 @@ body {
     margin-top: 20px;
     cursor: pointer;
 }
+
+/* Views Management */
+.view-section {
+    width: 100%;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.temp-text {
+    text-align: center;
+    color: var(--text-muted);
+    margin-top: 50px;
+}
+
+/* Post Cards */
+#posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.post-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-pink);
+    font-weight: bold;
+}
+
+.post-author-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-author-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.verified-badge {
+    color: #1da1f2;
+    font-size: 12px;
+}
+
+.post-time {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.post-body {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: #e4e6eb;
+}
+
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #2a2d3a;
+    padding-top: 10px;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action-btn:hover, .action-btn.active {
+    color: var(--primary-pink);
+}
+
+/* Add Post Form */
+.add-post-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.add-post-card h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.custom-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #2a2d3a;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+}
+
+#submit-post-btn {
+    background: var(--primary-pink);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#submit-post-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
