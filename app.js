@@ -1,4 +1,4 @@
-// --- Language Configuration (i18n) ---
+// --- Language Dictionary ---
 const translations = {
     sw: {
         appName: "Sms Tamu 💖",
@@ -71,14 +71,61 @@ const translations = {
 };
 
 let currentLang = 'sw'; 
+let supabase;
+let isLoginMode = true;
+let currentUser = null;
+let userProfile = { username: 'Anonymous', bio: '', avatar_url: 'https://via.placeholder.com/150' };
 
-// Helper functions to prevent crashes if an element is missing
-function hideEl(id) { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }
-function showEl(id) { const el = document.getElementById(id); if (el) el.classList.remove('hidden'); }
+// Initialize Supabase
+try {
+    const supabaseUrl = 'https://wwavdbfibzbjsnnavvfj.supabase.co';
+    const supabaseKey = 'sb_publishable_L1DxHGDmy2E8YVQDa3-M_g_Us4QmJQ7';
+    if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        console.error("Supabase script not loaded.");
+    }
+} catch (error) {
+    console.error("Supabase initialization error:", error);
+}
 
+// Ensure DOM is fully loaded
+document.addEventListener("DOMContentLoaded", async () => {
+    window.setLanguage('sw');
+    if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        handleSessionState(session);
+        
+        supabase.auth.onAuthStateChange((event, session) => {
+            handleSessionState(session);
+        });
+    }
+});
+
+// Helper functions for safe element manipulation
+function safeHide(id) { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }
+function safeShow(id) { const el = document.getElementById(id); if (el) el.classList.remove('hidden'); }
+function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
+
+function handleSessionState(session) {
+    if (session) {
+        currentUser = session.user;
+        safeHide('landing-section');
+        safeHide('auth-section');
+        safeShow('main-app');
+        fetchProfile(); 
+        fetchPosts();   
+    } else {
+        currentUser = null;
+        safeHide('main-app');
+        safeHide('auth-section');
+        safeShow('landing-section');
+    }
+}
+
+// Global window functions mapped for HTML onclick attributes
 window.setLanguage = function(lang) {
     currentLang = lang;
-    
     const btnSw = document.getElementById('btn-sw');
     const btnEn = document.getElementById('btn-en');
     
@@ -88,10 +135,10 @@ window.setLanguage = function(lang) {
         document.getElementById(`btn-${lang}`).classList.add('active');
     }
 
-    document.querySelectorAll('[data-i18n]').forEach(element => {
-        const key = element.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            element.innerText = translations[lang][key];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            el.innerText = translations[lang][key];
         }
     });
 
@@ -104,117 +151,62 @@ window.setLanguage = function(lang) {
     if (postContent) postContent.placeholder = (lang === 'sw') ? "Andika hapa..." : "Write here...";
 };
 
-// --- Initialization ---
-let supabase;
-let isLoginMode = true;
-let currentUser = null;
-let userProfile = { username: 'Anonymous', bio: '', avatar_url: 'https://via.placeholder.com/150' };
-
-try {
-    const supabaseUrl = 'https://wwavdbfibzbjsnnavvfj.supabase.co';
-    const supabaseKey = 'sb_publishable_L1DxHGDmy2E8YVQDa3-M_g_Us4QmJQ7';
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-} catch (error) {
-    console.error("Supabase Error:", error);
-}
-
-// Ensure DOM is ready before doing anything
-document.addEventListener("DOMContentLoaded", async () => {
-    setLanguage('sw'); // Set default language
-    
-    if (supabase) {
-        const { data: { session } } = await supabase.auth.getSession();
-        handleSessionState(session);
-
-        supabase.auth.onAuthStateChange((event, session) => {
-            handleSessionState(session);
-        });
-    }
-});
-
-function handleSessionState(session) {
-    if (session) {
-        currentUser = session.user;
-        hideEl('landing-section');
-        hideEl('auth-section');
-        showEl('main-app');
-        fetchProfile(); 
-        fetchPosts();   
-    } else {
-        currentUser = null;
-        hideEl('main-app');
-        hideEl('auth-section');
-        showEl('landing-section');
-    }
-}
-
-// --- Auth UI Toggling ---
 window.showAuthSection = function() {
-    hideEl('landing-section');
-    showEl('auth-section');
+    safeHide('landing-section');
+    safeShow('auth-section');
 };
 
 window.toggleAuthMode = function() {
     isLoginMode = !isLoginMode;
-    const errorMsg = document.getElementById('auth-error');
-    if (errorMsg) errorMsg.innerText = ''; 
+    safeSetText('auth-error', ''); 
     
-    const authTitle = document.getElementById('auth-title');
-    const authBtn = document.getElementById('auth-btn');
-    const toggleText = document.getElementById('toggle-text');
-    const toggleLink = document.getElementById('toggle-link');
-
     if (isLoginMode) {
-        if(authTitle) authTitle.innerText = translations[currentLang].loginTitle;
-        if(authBtn) authBtn.innerText = translations[currentLang].loginBtn;
-        if(toggleText) toggleText.innerText = translations[currentLang].toggleToSignupText;
-        if(toggleLink) toggleLink.innerText = translations[currentLang].toggleToSignupLink;
+        safeSetText('auth-title', translations[currentLang].loginTitle);
+        safeSetText('auth-btn', translations[currentLang].loginBtn);
+        safeSetText('toggle-text', translations[currentLang].toggleToSignupText);
+        safeSetText('toggle-link', translations[currentLang].toggleToSignupLink);
     } else {
-        if(authTitle) authTitle.innerText = translations[currentLang].signupTitle;
-        if(authBtn) authBtn.innerText = translations[currentLang].signupBtn;
-        if(toggleText) toggleText.innerText = translations[currentLang].toggleToLoginText;
-        if(toggleLink) toggleLink.innerText = translations[currentLang].toggleToLoginLink;
+        safeSetText('auth-title', translations[currentLang].signupTitle);
+        safeSetText('auth-btn', translations[currentLang].signupBtn);
+        safeSetText('toggle-text', translations[currentLang].toggleToLoginText);
+        safeSetText('toggle-link', translations[currentLang].toggleToLoginLink);
     }
 };
 
 window.handleAuth = async function() {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-    const errorMsg = document.getElementById('auth-error');
     const authBtn = document.getElementById('auth-btn');
 
     const email = emailInput ? emailInput.value.trim() : '';
     const password = passwordInput ? passwordInput.value : '';
-    if(errorMsg) errorMsg.innerText = '';
+    
+    safeSetText('auth-error', '');
 
     if (!email || !password) {
-        if(errorMsg) errorMsg.innerText = (currentLang === 'sw') ? "Jaza barua pepe na nenosiri." : "Provide email and password.";
+        safeSetText('auth-error', (currentLang === 'sw') ? "Jaza barua pepe na nenosiri." : "Provide email and password.");
         return;
     }
 
-    if(authBtn) {
+    if (authBtn) {
         authBtn.innerText = translations[currentLang].authProcessing;
         authBtn.disabled = true;
     }
 
     if (isLoginMode) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error && errorMsg) errorMsg.innerText = error.message;
+        if (error) safeSetText('auth-error', error.message);
     } else {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
-            if(errorMsg) errorMsg.innerText = error.message;
+            safeSetText('auth-error', error.message);
         } else {
-            alert((currentLang === 'sw') ? 'Akaunti imetengenezwa! Unaingia...' : 'Account created! Logging in...');
-            if (data.session) {
-                handleSessionState(data.session);
-            } else if (errorMsg) {
-                errorMsg.innerText = (currentLang === 'sw') ? 'Thibitisha email yako.' : 'Please verify your email.';
-            }
+            alert((currentLang === 'sw') ? 'Akaunti imetengenezwa!' : 'Account created!');
+            if (data.session) handleSessionState(data.session);
         }
     }
     
-    if(authBtn) {
+    if (authBtn) {
         authBtn.innerText = isLoginMode ? translations[currentLang].loginBtn : translations[currentLang].signupBtn;
         authBtn.disabled = false;
     }
@@ -225,54 +217,44 @@ window.logout = async function() {
     handleSessionState(null);
 };
 
-// --- Navigation ---
 window.navigate = function(tabName, element) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    if(tabName !== 'add') element.classList.add('active');
+    if (tabName !== 'add' && element) element.classList.add('active');
 
     document.querySelectorAll('.view-section').forEach(view => view.classList.add('hidden'));
-    showEl(`view-${tabName}`);
+    safeShow(`view-${tabName}`);
 
-    if(tabName === 'home') fetchPosts();
-    if(tabName === 'profile') fetchProfile();
+    if (tabName === 'home') fetchPosts();
+    if (tabName === 'profile') fetchProfile();
 };
 
-// --- Profile & Database Logic ---
 async function fetchProfile() {
     if (!currentUser) return;
     const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
-
+    
     if (data) {
         userProfile = data;
-        updateProfileUI();
-    } else if (error && error.code === 'PGRST116') {
-        const newProfile = { id: currentUser.id, username: 'User_' + Math.floor(Math.random() * 100) };
-        await supabase.from('profiles').insert([newProfile]);
-        userProfile = newProfile;
         updateProfileUI();
     }
 }
 
 function updateProfileUI() {
-    const pName = document.getElementById('profile-name');
-    const pBio = document.getElementById('profile-bio');
+    safeSetText('profile-name', userProfile.username || 'Anonymous');
+    safeSetText('profile-bio', userProfile.bio || '');
     const pImg = document.getElementById('profile-img');
-    
-    if(pName) pName.innerText = userProfile.username || 'Anonymous';
-    if(pBio) pBio.innerText = userProfile.bio || '';
     if (pImg && userProfile.avatar_url) pImg.src = userProfile.avatar_url;
 }
 
 window.openEditProfile = function() {
     const eName = document.getElementById('edit-username');
     const eBio = document.getElementById('edit-bio');
-    if(eName) eName.value = userProfile.username || '';
-    if(eBio) eBio.value = userProfile.bio || '';
-    showEl('edit-profile-modal');
+    if (eName) eName.value = userProfile.username || '';
+    if (eBio) eBio.value = userProfile.bio || '';
+    safeShow('edit-profile-modal');
 };
 
 window.closeEditProfile = function() {
-    hideEl('edit-profile-modal');
+    safeHide('edit-profile-modal');
 };
 
 window.saveProfile = async function() {
@@ -284,7 +266,7 @@ window.saveProfile = async function() {
         userProfile.username = newName;
         userProfile.bio = newBio;
         updateProfileUI();
-        closeEditProfile();
+        window.closeEditProfile();
         fetchPosts(); 
     }
 };
@@ -293,8 +275,7 @@ window.uploadAvatar = async function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    const pName = document.getElementById('profile-name');
-    if(pName) pName.innerText = (currentLang === 'sw') ? "Inapakia..." : "Uploading...";
+    safeSetText('profile-name', (currentLang === 'sw') ? "Inapakia..." : "Uploading...");
     
     const fileExt = file.name.split('.').pop();
     const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
@@ -314,7 +295,7 @@ window.uploadAvatar = async function(event) {
 
 async function fetchPosts() {
     const container = document.getElementById('posts-container');
-    if(!container) return;
+    if (!container) return;
     
     const { data: posts, error } = await supabase.from('posts').select(`*, profiles (username, avatar_url)`).order('created_at', { ascending: false });
 
@@ -352,27 +333,31 @@ async function fetchPosts() {
 
 window.submitPost = async function() {
     if (!currentUser) return;
-    const category = document.getElementById('post-category').value;
-    const content = document.getElementById('post-content').value.trim();
+    
+    const categoryInput = document.getElementById('post-category');
+    const contentInput = document.getElementById('post-content');
     const submitBtn = document.getElementById('submit-post-btn');
+
+    const category = categoryInput ? categoryInput.value : '';
+    const content = contentInput ? contentInput.value.trim() : '';
 
     if (!category || !content) return;
 
-    if(submitBtn) {
+    if (submitBtn) {
         submitBtn.innerText = translations[currentLang].authProcessing;
         submitBtn.disabled = true;
     }
 
     const { error } = await supabase.from('posts').insert([{ user_id: currentUser.id, content: content, category: category }]);
 
-    if(submitBtn) {
+    if (submitBtn) {
         submitBtn.innerText = translations[currentLang].postMessageBtn;
         submitBtn.disabled = false;
     }
 
     if (!error) {
-        document.getElementById('post-category').value = '';
-        document.getElementById('post-content').value = '';
+        if (categoryInput) categoryInput.value = '';
+        if (contentInput) contentInput.value = '';
         const homeTab = document.querySelector('.nav-item i.fa-home').parentElement;
         window.navigate('home', homeTab);
     }
