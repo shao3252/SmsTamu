@@ -1,13 +1,78 @@
-// Confirmation alert to verify script execution (You can delete this later)
-alert("Success! JavaScript is running and the variable collision is fixed.");
+// Confirmation log for developers (check browser console)
+console.log("Sms Tamu: Initialization starting...");
 
 const translations = {
-    sw: { appName: "Sms Tamu 💖", landingDesc: "Mahali sahihi pa kupata meseji tamu za mapenzi na kuvutia.", getStartedBtn: "Anza Sasa", loginTitle: "Ingia Kwenye Akaunti", signupTitle: "Tengeneza Akaunti", loginBtn: "Ingia", signupBtn: "Jisajili", toggleToSignupText: "Hauna akaunti?", toggleToSignupLink: "Jisajili hapa", toggleToLoginText: "Unayo akaunti?", toggleToLoginLink: "Ingia hapa", navHome: "Nyumbani", navSearch: "Tafuta", navChat: "Chat", navProfile: "Wasifu", writeMessage: "Andika Meseji", selectCategory: "Chagua Kundi...", postMessageBtn: "Tuma Posti", following: "Wanaofuatiliwa", followers: "Wafuasi", editProfileBtn: "Badili Wasifu", myPosts: "Posti Zangu", liked: "Zilizopendwa", saved: "Zilizohifadhiwa", logoutBtn: "Toka (Logout)", cancelBtn: "Ghairi", saveBtn: "Hifadhi", loadingPosts: "Inapakia...", noPosts: "Hakuna posti bado. Kuwa wa kwanza kuposti!", emailPlaceholder: "Barua Pepe", passwordPlaceholder: "Nenosiri", authProcessing: "Inachakata..." },
-    en: { appName: "Sms Tamu 💖", landingDesc: "The best place for sweet and romantic messages.", getStartedBtn: "Get Started", loginTitle: "Login to Account", signupTitle: "Create Account", loginBtn: "Login", signupBtn: "Sign Up", toggleToSignupText: "Don't have an account?", toggleToSignupLink: "Sign up here", toggleToLoginText: "Already have an account?", toggleToLoginLink: "Login here", navHome: "Home", navSearch: "Search", navChat: "Chat", navProfile: "Profile", writeMessage: "Write Message", selectCategory: "Select Category...", postMessageBtn: "Post Message", following: "Following", followers: "Followers", editProfileBtn: "Edit Profile", myPosts: "My Posts", liked: "Liked", saved: "Saved", logoutBtn: "Logout", cancelBtn: "Cancel", saveBtn: "Save", loadingPosts: "Loading...", noPosts: "No sweet messages yet. Be the first to post!", emailPlaceholder: "Email Address", passwordPlaceholder: "Password", authProcessing: "Processing..." }
+    sw: {
+        appName: "Sms Tamu 💖",
+        landingDesc: "Mahali sahihi pa kupata meseji tamu za mapenzi na kuvutia.",
+        getStartedBtn: "Anza Sasa",
+        loginTitle: "Ingia Kwenye Akaunti",
+        signupTitle: "Tengeneza Akaunti",
+        loginBtn: "Ingia",
+        signupBtn: "Jisajili",
+        toggleToSignupText: "Hauna akaunti?",
+        toggleToSignupLink: "Jisajili hapa",
+        toggleToLoginText: "Unayo akaunti?",
+        toggleToLoginLink: "Ingia hapa",
+        navHome: "Nyumbani",
+        navSearch: "Tafuta",
+        navChat: "Chat",
+        navProfile: "Wasifu",
+        writeMessage: "Andika Meseji",
+        selectCategory: "Chagua Kundi...",
+        postMessageBtn: "Tuma Posti",
+        following: "Wanaofuatiliwa",
+        followers: "Wafuasi",
+        editProfileBtn: "Badili Wasifu",
+        myPosts: "Posti Zangu",
+        liked: "Zilizopendwa",
+        saved: "Zilizohifadhiwa",
+        logoutBtn: "Toka (Logout)",
+        cancelBtn: "Ghairi",
+        saveBtn: "Hifadhi",
+        loadingPosts: "Inapakia...",
+        noPosts: "Hakuna posti bado. Kuwa wa kwanza kuposti!",
+        emailPlaceholder: "Barua Pepe",
+        passwordPlaceholder: "Nenosiri",
+        authProcessing: "Inachakata..."
+    },
+    en: {
+        appName: "Sms Tamu 💖",
+        landingDesc: "The best place for sweet and romantic messages.",
+        getStartedBtn: "Get Started",
+        loginTitle: "Login to Account",
+        signupTitle: "Create Account",
+        loginBtn: "Login",
+        signupBtn: "Sign Up",
+        toggleToSignupText: "Don't have an account?",
+        toggleToSignupLink: "Sign up here",
+        toggleToLoginText: "Already have an account?",
+        toggleToLoginLink: "Login here",
+        navHome: "Home",
+        navSearch: "Search",
+        navChat: "Chat",
+        navProfile: "Profile",
+        writeMessage: "Write Message",
+        selectCategory: "Select Category...",
+        postMessageBtn: "Post Message",
+        following: "Following",
+        followers: "Followers",
+        editProfileBtn: "Edit Profile",
+        myPosts: "My Posts",
+        liked: "Liked",
+        saved: "Saved",
+        logoutBtn: "Logout",
+        cancelBtn: "Cancel",
+        saveBtn: "Save",
+        loadingPosts: "Loading...",
+        noPosts: "No sweet messages yet. Be the first to post!",
+        emailPlaceholder: "Email Address",
+        passwordPlaceholder: "Password",
+        authProcessing: "Processing..."
+    }
 };
 
 let currentLang = 'sw'; 
-// Renamed variable to avoid 'already declared' syntax error from CDN
 let supabaseClient = null; 
 let isLoginMode = true;
 let currentUser = null;
@@ -19,6 +84,8 @@ try {
     const supabaseKey = 'sb_publishable_L1DxHGDmy2E8YVQDa3-M_g_Us4QmJQ7';
     if (window.supabase) {
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        console.warn("Supabase window object not found.");
     }
 } catch (error) {
     console.error("Supabase Initialization Error:", error);
@@ -26,11 +93,15 @@ try {
 
 // Event Listeners
 document.addEventListener("DOMContentLoaded", async () => {
-    setLanguage('sw');
+    window.setLanguage('sw');
     if (supabaseClient) {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        handleSessionState(session);
-        supabaseClient.auth.onAuthStateChange((event, session) => handleSessionState(session));
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            handleSessionState(session);
+            supabaseClient.auth.onAuthStateChange((event, session) => handleSessionState(session));
+        } catch (error) {
+             console.error("Session retrieval error:", error);
+        }
     }
 });
 
@@ -96,7 +167,10 @@ window.toggleAuthMode = function() {
 
 // Authentication Methods
 window.handleAuth = async function() {
-    if (!supabaseClient) return alert("System is not connected to the Database.");
+    if (!supabaseClient) {
+        console.error("System is not connected to the Database.");
+        return;
+    }
     
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -112,17 +186,21 @@ window.handleAuth = async function() {
     authBtn.innerText = translations[currentLang].authProcessing;
     authBtn.disabled = true;
 
-    if (isLoginMode) {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) errorMsg.innerText = error.message;
-    } else {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) {
-            errorMsg.innerText = error.message;
+    try {
+        if (isLoginMode) {
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) errorMsg.innerText = error.message;
         } else {
-            alert((currentLang === 'sw') ? 'Akaunti imetengenezwa!' : 'Account created!');
-            if (data.session) handleSessionState(data.session);
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+                errorMsg.innerText = error.message;
+            } else {
+                console.log("Account created successfully");
+                if (data.session) handleSessionState(data.session);
+            }
         }
+    } catch(err) {
+        console.error("Authentication error:", err);
     }
     
     authBtn.innerText = isLoginMode ? translations[currentLang].loginBtn : translations[currentLang].signupBtn;
@@ -130,7 +208,13 @@ window.handleAuth = async function() {
 };
 
 window.logout = async function() { 
-    if (supabaseClient) await supabaseClient.auth.signOut(); 
+    if (supabaseClient) {
+        try {
+             await supabaseClient.auth.signOut(); 
+        } catch(err){
+             console.error("Signout error:", err);
+        }
+    }
     handleSessionState(null); 
 };
 
@@ -148,10 +232,16 @@ window.navigate = function(tabName, element) {
 // Profile Methods
 async function fetchProfile() {
     if (!currentUser || !supabaseClient) return;
-    const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
-    if (data) { 
-        userProfile = data; 
-        updateProfileUI(); 
+    try {
+        const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+        if (data) { 
+            userProfile = data; 
+            updateProfileUI(); 
+        } else if (error) {
+             console.warn("Profile fetch warning:", error.message);
+        }
+    } catch(err) {
+        console.error("Fetch profile error:", err);
     }
 }
 
@@ -176,20 +266,24 @@ window.saveProfile = async function() {
     const newName = document.getElementById('edit-username').value.trim();
     const newBio = document.getElementById('edit-bio').value.trim();
     
-    const { error } = await supabaseClient.from('profiles').upsert({ 
-        id: currentUser.id, 
-        username: newName, 
-        bio: newBio 
-    });
-    
-    if (!error) { 
-        userProfile.username = newName; 
-        userProfile.bio = newBio; 
-        updateProfileUI(); 
-        closeEditProfile(); 
-        fetchPosts(); 
-    } else {
-        console.error("Profile save error:", error.message);
+    try {
+        const { error } = await supabaseClient.from('profiles').upsert({ 
+            id: currentUser.id, 
+            username: newName, 
+            bio: newBio 
+        });
+        
+        if (!error) { 
+            userProfile.username = newName; 
+            userProfile.bio = newBio; 
+            updateProfileUI(); 
+            closeEditProfile(); 
+            fetchPosts(); 
+        } else {
+            console.error("Profile save error:", error.message);
+        }
+    } catch(err) {
+        console.error("Save profile error:", err);
     }
 };
 
@@ -202,16 +296,21 @@ window.uploadAvatar = async function(event) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
     
-    const { error: uploadError } = await supabaseClient.storage.from('avatars').upload(fileName, file);
-    if (!uploadError) {
-        const { data } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
-        await supabaseClient.from('profiles').upsert({ id: currentUser.id, avatar_url: data.publicUrl });
-        userProfile.avatar_url = data.publicUrl;
-        updateProfileUI(); 
-        fetchPosts();
-    } else {
-        console.error("Avatar upload error:", uploadError.message);
-        updateProfileUI(); // Revert UI text
+    try {
+        const { error: uploadError } = await supabaseClient.storage.from('avatars').upload(fileName, file);
+        if (!uploadError) {
+            const { data } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
+            await supabaseClient.from('profiles').upsert({ id: currentUser.id, avatar_url: publicUrlData.publicUrl });
+            userProfile.avatar_url = publicUrlData.publicUrl;
+            updateProfileUI(); 
+            fetchPosts();
+        } else {
+            console.error("Avatar upload error:", uploadError.message);
+            updateProfileUI(); 
+        }
+    } catch(err) {
+         console.error("Avatar upload execution error:", err);
+         updateProfileUI();
     }
 };
 
@@ -220,35 +319,39 @@ window.fetchPosts = async function() {
     if (!supabaseClient) return;
     const container = document.getElementById('posts-container');
     
-    const { data: posts, error } = await supabaseClient.from('posts').select(`*, profiles (username, avatar_url)`).order('created_at', { ascending: false });
-    
-    if (error || !posts) return;
-    
-    if (posts.length === 0) { 
-        container.innerHTML = `<p class="temp-text">${translations[currentLang].noPosts}</p>`; 
-        return; 
-    }
-    
-    container.innerHTML = '';
-    posts.forEach(post => {
-        const authorName = post.profiles?.username || 'Anonymous';
-        const avatarUrl = post.profiles?.avatar_url || 'https://via.placeholder.com/150';
-        container.innerHTML += `
-            <div class="post-card">
-                <div class="post-header">
-                    <img src="${avatarUrl}" class="post-avatar">
-                    <div class="post-author-info">
-                        <span class="post-author-name">${authorName} <i class="fas fa-check-circle verified-badge"></i></span>
-                        <span class="post-time">${new Date(post.created_at).toLocaleDateString()}</span>
+    try {
+        const { data: posts, error } = await supabaseClient.from('posts').select(`*, profiles (username, avatar_url)`).order('created_at', { ascending: false });
+        
+        if (error || !posts) return;
+        
+        if (posts.length === 0) { 
+            container.innerHTML = `<p class="temp-text">${translations[currentLang].noPosts}</p>`; 
+            return; 
+        }
+        
+        container.innerHTML = '';
+        posts.forEach(post => {
+            const authorName = post.profiles?.username || 'Anonymous';
+            const avatarUrl = post.profiles?.avatar_url || 'https://via.placeholder.com/150';
+            container.innerHTML += `
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="${avatarUrl}" class="post-avatar">
+                        <div class="post-author-info">
+                            <span class="post-author-name">${authorName} <i class="fas fa-check-circle verified-badge"></i></span>
+                            <span class="post-time">${new Date(post.created_at).toLocaleDateString()}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="post-body">${post.content}</div>
-                <div class="post-actions">
-                    <button class="action-btn"><i class="fas fa-heart"></i></button>
-                    <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>
-                </div>
-            </div>`;
-    });
+                    <div class="post-body">${post.content}</div>
+                    <div class="post-actions">
+                        <button class="action-btn"><i class="fas fa-heart"></i></button>
+                        <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>`;
+        });
+    } catch(err) {
+         console.error("Fetch posts error:", err);
+    }
 };
 
 window.submitPost = async function() {
@@ -263,20 +366,26 @@ window.submitPost = async function() {
     submitBtn.innerText = translations[currentLang].authProcessing; 
     submitBtn.disabled = true;
     
-    const { error } = await supabaseClient.from('posts').insert([{ 
-        user_id: currentUser.id, 
-        content: content, 
-        category: category 
-    }]);
-    
-    submitBtn.innerText = translations[currentLang].postMessageBtn; 
-    submitBtn.disabled = false;
+    try {
+        const { error } = await supabaseClient.from('posts').insert([{ 
+            user_id: currentUser.id, 
+            content: content, 
+            category: category 
+        }]);
+        
+        submitBtn.innerText = translations[currentLang].postMessageBtn; 
+        submitBtn.disabled = false;
 
-    if (!error) {
-        document.getElementById('post-category').value = ''; 
-        document.getElementById('post-content').value = '';
-        navigate('home', document.querySelector('.nav-item i.fa-home').parentElement);
-    } else {
-        console.error("Post submission error:", error.message);
+        if (!error) {
+            document.getElementById('post-category').value = ''; 
+            document.getElementById('post-content').value = '';
+            navigate('home', document.querySelector('.nav-item i.fa-home').parentElement);
+        } else {
+            console.error("Post submission error:", error.message);
+        }
+    } catch(err) {
+         console.error("Submit post execution error:", err);
+         submitBtn.disabled = false;
+         submitBtn.innerText = translations[currentLang].postMessageBtn; 
     }
 };
