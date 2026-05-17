@@ -1,3 +1,99 @@
+// --- Language Configuration (i18n) ---
+const translations = {
+    sw: {
+        appName: "Sms Tamu 💖",
+        landingDesc: "Mahali sahihi pa kupata meseji tamu za mapenzi na kuvutia.",
+        getStartedBtn: "Anza Sasa",
+        loginTitle: "Ingia Kwenye Akaunti",
+        signupTitle: "Tengeneza Akaunti",
+        loginBtn: "Ingia",
+        signupBtn: "Jisajili",
+        toggleToSignupText: "Hauna akaunti?",
+        toggleToSignupLink: "Jisajili hapa",
+        toggleToLoginText: "Unayo akaunti?",
+        toggleToLoginLink: "Ingia hapa",
+        navHome: "Nyumbani",
+        navSearch: "Tafuta",
+        navChat: "Chat",
+        navProfile: "Wasifu",
+        writeMessage: "Andika Meseji",
+        selectCategory: "Chagua Kundi...",
+        postMessageBtn: "Tuma Posti",
+        following: "Wanaofuatiliwa",
+        followers: "Wafuasi",
+        editProfileBtn: "Badili Wasifu",
+        myPosts: "Posti Zangu",
+        liked: "Zilizopendwa",
+        saved: "Zilizohifadhiwa",
+        logoutBtn: "Toka (Logout)",
+        cancelBtn: "Ghairi",
+        saveBtn: "Hifadhi",
+        loadingPosts: "Inapakia...",
+        noPosts: "Hakuna posti bado. Kuwa wa kwanza kuposti!",
+        emailPlaceholder: "Barua Pepe",
+        passwordPlaceholder: "Nenosiri",
+        authProcessing: "Inachakata..."
+    },
+    en: {
+        appName: "Sms Tamu 💖",
+        landingDesc: "The best place for sweet and romantic messages.",
+        getStartedBtn: "Get Started",
+        loginTitle: "Login to Account",
+        signupTitle: "Create Account",
+        loginBtn: "Login",
+        signupBtn: "Sign Up",
+        toggleToSignupText: "Don't have an account?",
+        toggleToSignupLink: "Sign up here",
+        toggleToLoginText: "Already have an account?",
+        toggleToLoginLink: "Login here",
+        navHome: "Home",
+        navSearch: "Search",
+        navChat: "Chat",
+        navProfile: "Profile",
+        writeMessage: "Write Message",
+        selectCategory: "Select Category...",
+        postMessageBtn: "Post Message",
+        following: "Following",
+        followers: "Followers",
+        editProfileBtn: "Edit Profile",
+        myPosts: "My Posts",
+        liked: "Liked",
+        saved: "Saved",
+        logoutBtn: "Logout",
+        cancelBtn: "Cancel",
+        saveBtn: "Save",
+        loadingPosts: "Loading...",
+        noPosts: "No sweet messages yet. Be the first to post!",
+        emailPlaceholder: "Email Address",
+        passwordPlaceholder: "Password",
+        authProcessing: "Processing..."
+    }
+};
+
+let currentLang = 'sw'; // Default language
+
+function setLanguage(lang) {
+    currentLang = lang;
+    
+    // Update active button state
+    document.getElementById('btn-sw').classList.remove('active');
+    document.getElementById('btn-en').classList.remove('active');
+    document.getElementById(`btn-${lang}`).classList.add('active');
+
+    // Update all text elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            element.innerText = translations[lang][key];
+        }
+    });
+
+    // Update Placeholders
+    document.getElementById('email').placeholder = translations[lang].emailPlaceholder;
+    document.getElementById('password').placeholder = translations[lang].passwordPlaceholder;
+    document.getElementById('post-content').placeholder = (lang === 'sw') ? "Andika hapa..." : "Write here...";
+}
+
 // 1. Initialize Supabase
 const supabaseUrl = 'https://wwavdbfibzbjsnnavvfj.supabase.co';
 const supabaseKey = 'sb_publishable_L1DxHGDmy2E8YVQDa3-M_g_Us4QmJQ7';
@@ -9,19 +105,30 @@ let currentUser = null;
 let userProfile = { username: 'Anonymous', bio: '', avatar_url: 'https://via.placeholder.com/150' };
 
 // DOM Elements
+const landingSection = document.getElementById('landing-section');
 const authSection = document.getElementById('auth-section');
 const mainApp = document.getElementById('main-app');
 const authTitle = document.getElementById('auth-title');
 const authBtn = document.getElementById('auth-btn');
-const toggleAuthText = document.querySelector('.toggle-auth');
+const toggleText = document.getElementById('toggle-text');
+const toggleLink = document.getElementById('toggle-link');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const errorMsg = document.getElementById('auth-error');
 
 // --- Initialization & Auth ---
 async function checkSession() {
+    setLanguage('sw'); // Apply default language on load
     const { data: { session } } = await supabase.auth.getSession();
-    handleSessionState(session);
+    
+    if (session) {
+        handleSessionState(session);
+    } else {
+        // Show landing page if not logged in
+        landingSection.classList.remove('hidden');
+        authSection.classList.add('hidden');
+        mainApp.classList.add('hidden');
+    }
 
     supabase.auth.onAuthStateChange((event, session) => {
         handleSessionState(session);
@@ -31,26 +138,35 @@ async function checkSession() {
 function handleSessionState(session) {
     if (session) {
         currentUser = session.user;
-        showMainApp();
+        landingSection.classList.add('hidden');
+        authSection.classList.add('hidden');
+        mainApp.classList.remove('hidden');
         fetchProfile(); 
         fetchPosts();   
     } else {
         currentUser = null;
-        showAuthSection();
     }
+}
+
+function showAuthSection() {
+    landingSection.classList.add('hidden');
+    authSection.classList.remove('hidden');
 }
 
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
     errorMsg.innerText = ''; 
+    
     if (isLoginMode) {
-        authTitle.innerText = 'Login to Account';
-        authBtn.innerText = 'Login';
-        toggleAuthText.innerText = 'Don\'t have an account? Sign up here.';
+        authTitle.innerText = translations[currentLang].loginTitle;
+        authBtn.innerText = translations[currentLang].loginBtn;
+        toggleText.innerText = translations[currentLang].toggleToSignupText;
+        toggleLink.innerText = translations[currentLang].toggleToSignupLink;
     } else {
-        authTitle.innerText = 'Create Account';
-        authBtn.innerText = 'Sign Up';
-        toggleAuthText.innerText = 'Already have an account? Login here.';
+        authTitle.innerText = translations[currentLang].signupTitle;
+        authBtn.innerText = translations[currentLang].signupBtn;
+        toggleText.innerText = translations[currentLang].toggleToLoginText;
+        toggleLink.innerText = translations[currentLang].toggleToLoginLink;
     }
 }
 
@@ -60,44 +176,45 @@ async function handleAuth() {
     errorMsg.innerText = '';
 
     if (!email || !password) {
-        errorMsg.innerText = 'Please provide both email and password.';
+        errorMsg.innerText = (currentLang === 'sw') ? "Jaza barua pepe na nenosiri." : "Provide email and password.";
         return;
     }
 
-    authBtn.innerText = 'Processing...';
+    authBtn.innerText = translations[currentLang].authProcessing;
     authBtn.disabled = true;
 
     if (isLoginMode) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) errorMsg.innerText = error.message;
     } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        // Sign up logic fix
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
             errorMsg.innerText = error.message;
         } else {
-            alert('Account created successfully! Logging you in...');
+            const successMsg = (currentLang === 'sw') ? 'Akaunti imetengenezwa! Unaingia...' : 'Account created! Logging in...';
+            alert(successMsg);
+            
+            // Auto login if email confirmation is off in Supabase
+            if (data.session) {
+                handleSessionState(data.session);
+            } else {
+                errorMsg.innerText = (currentLang === 'sw') ? 'Tafadhali thibitisha barua pepe yako (Check email).' : 'Please verify your email address.';
+            }
         }
     }
-    authBtn.innerText = isLoginMode ? 'Login' : 'Sign Up';
+    
+    authBtn.innerText = isLoginMode ? translations[currentLang].loginBtn : translations[currentLang].signupBtn;
     authBtn.disabled = false;
 }
 
 async function logout() {
     await supabase.auth.signOut();
-}
-
-// --- UI / Navigation ---
-function showMainApp() {
-    authSection.classList.add('hidden');
-    mainApp.classList.remove('hidden');
-}
-
-function showAuthSection() {
     mainApp.classList.add('hidden');
-    authSection.classList.remove('hidden');
-    emailInput.value = ''; passwordInput.value = '';
+    landingSection.classList.remove('hidden');
 }
 
+// --- Navigation ---
 function navigate(tabName, element) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     if(tabName !== 'add') element.classList.add('active');
@@ -125,7 +242,6 @@ async function fetchProfile() {
         userProfile = data;
         updateProfileUI();
     } else if (error && error.code === 'PGRST116') {
-        // Create default profile if missing
         const newProfile = { id: currentUser.id, username: 'User_' + Math.floor(Math.random() * 1000) };
         await supabase.from('profiles').insert([newProfile]);
         userProfile = newProfile;
@@ -135,7 +251,7 @@ async function fetchProfile() {
 
 function updateProfileUI() {
     document.getElementById('profile-name').innerText = userProfile.username || 'Anonymous';
-    document.getElementById('profile-bio').innerText = userProfile.bio || 'No bio yet.';
+    document.getElementById('profile-bio').innerText = userProfile.bio || '';
     if (userProfile.avatar_url) {
         document.getElementById('profile-img').src = userProfile.avatar_url;
     }
@@ -176,7 +292,7 @@ async function uploadAvatar(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    document.getElementById('profile-name').innerText = "Uploading...";
+    document.getElementById('profile-name').innerText = (currentLang === 'sw') ? "Inapakia..." : "Uploading...";
     const fileExt = file.name.split('.').pop();
     const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
 
@@ -213,12 +329,12 @@ async function fetchPosts() {
         .order('created_at', { ascending: false });
 
     if (error) {
-        container.innerHTML = `<p class="error-msg">Failed to load posts.</p>`;
+        container.innerHTML = `<p class="error-msg">Failed to load.</p>`;
         return;
     }
 
     if (posts.length === 0) {
-        container.innerHTML = `<p class="temp-text">No sweet messages yet. Be the first to post!</p>`;
+        container.innerHTML = `<p class="temp-text">${translations[currentLang].noPosts}</p>`;
         return;
     }
 
@@ -240,9 +356,9 @@ async function fetchPosts() {
             </div>
             <div class="post-body">${post.content}</div>
             <div class="post-actions">
-                <button class="action-btn"><i class="fas fa-heart"></i> Like</button>
-                <button class="action-btn"><i class="fas fa-comment"></i> 0</button>
-                <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i> Copy</button>
+                <button class="action-btn"><i class="fas fa-heart"></i></button>
+                <button class="action-btn"><i class="fas fa-comment"></i></button>
+                <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>
             </div>
         `;
         container.appendChild(postElement);
@@ -250,27 +366,25 @@ async function fetchPosts() {
 }
 
 async function submitPost() {
-    if (!currentUser) return alert("You must be logged in to post.");
+    if (!currentUser) return;
 
     const category = document.getElementById('post-category').value;
     const content = document.getElementById('post-content').value.trim();
     const submitBtn = document.getElementById('submit-post-btn');
 
-    if (!category || !content) return alert("Please select a category and write a message.");
+    if (!category || !content) return;
 
-    submitBtn.innerText = "Posting...";
+    submitBtn.innerText = translations[currentLang].authProcessing;
     submitBtn.disabled = true;
 
     const { error } = await supabase.from('posts').insert([
         { user_id: currentUser.id, content: content, category: category }
     ]);
 
-    submitBtn.innerText = "Post Message";
+    submitBtn.innerText = translations[currentLang].postMessageBtn;
     submitBtn.disabled = false;
 
-    if (error) {
-        alert("Error posting: " + error.message);
-    } else {
+    if (!error) {
         document.getElementById('post-category').value = '';
         document.getElementById('post-content').value = '';
         const homeTab = document.querySelector('.nav-item i.fa-home').parentElement;
