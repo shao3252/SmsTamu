@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sms Tamu</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div id="auth-section" class="container">
+        <h1 class="brand-title">Sms Tamu 💖</h1>
+        <div class="auth-card">
+            <h2 id="auth-title">Login to Account</h2>
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+            <button id="auth-btn" onclick="handleAuth()">Login</button>
+            <p class="toggle-auth" onclick="toggleAuthMode()">Don't have an account? Sign up here.</p>
+            <p id="auth-error" class="error-msg"></p>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <header>
+            <h1 class="brand-title">Sms Tamu 💖</h1>
+        </header>
+
+        <main id="content-area">
+            <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">
+                <h3>Welcome to Sms Tamu!</h3>
+                <p>You have successfully logged in.</p>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="navigate('home', this)">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="navigate('search', this)">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </div>
+            <div class="nav-item add-post" onclick="navigate('add', this)">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="nav-item" onclick="navigate('chat', this)">
+                <i class="fas fa-comment-dots"></i>
+                <span>Chat</span>
+            </div>
+            <div class="nav-item" onclick="navigate('profile', this)">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
