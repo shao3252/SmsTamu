@@ -5,6 +5,8 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // State Variables
 let isLoginMode = true;
+let currentUser = null;
+let userProfile = { username: 'Anonymous', bio: '', avatar_url: 'https://via.placeholder.com/150' };
 
 // DOM Elements
 const authSection = document.getElementById('auth-section');
@@ -16,28 +18,31 @@ const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const errorMsg = document.getElementById('auth-error');
 
-// 2. Session Check
+// --- Initialization & Auth ---
 async function checkSession() {
     const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-        showMainApp();
-    } else {
-        showAuthSection();
-    }
+    handleSessionState(session);
 
-    // Listen for auth state changes
     supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') showMainApp();
-        if (event === 'SIGNED_OUT') showAuthSection();
+        handleSessionState(session);
     });
 }
 
-// 3. Toggle Login/Signup Mode
+function handleSessionState(session) {
+    if (session) {
+        currentUser = session.user;
+        showMainApp();
+        fetchProfile(); 
+        fetchPosts();   
+    } else {
+        currentUser = null;
+        showAuthSection();
+    }
+}
+
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
-    errorMsg.innerText = ''; // Clear errors
-    
+    errorMsg.innerText = ''; 
     if (isLoginMode) {
         authTitle.innerText = 'Login to Account';
         authBtn.innerText = 'Login';
@@ -49,7 +54,6 @@ function toggleAuthMode() {
     }
 }
 
-// 4. Handle Authentication
 async function handleAuth() {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
@@ -64,43 +68,25 @@ async function handleAuth() {
     authBtn.disabled = true;
 
     if (isLoginMode) {
-        // Login
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) errorMsg.innerText = "Error: " + error.message;
+        if (error) errorMsg.innerText = error.message;
     } else {
-        // Sign Up
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) {
-            errorMsg.innerText = "Error: " + error.message;
+            errorMsg.innerText = error.message;
         } else {
             alert('Account created successfully! Logging you in...');
         }
     }
-
     authBtn.innerText = isLoginMode ? 'Login' : 'Sign Up';
     authBtn.disabled = false;
 }
 
-// 5. Logout
 async function logout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error('Logout error:', error.message);
+    await supabase.auth.signOut();
 }
 
-// 6. Navigation Logic
-function navigate(tabName, element) {
-    // Remove 'active' class from all icons
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    
-    // Add 'active' to the clicked icon, except the add button
-    if(tabName !== 'add') {
-        element.classList.add('active');
-    }
-
-    console.log("Navigating to:", tabName);
-}
-
-// 7. UI Helpers
+// --- UI / Navigation ---
 function showMainApp() {
     authSection.classList.add('hidden');
     mainApp.classList.remove('hidden');
@@ -109,60 +95,124 @@ function showMainApp() {
 function showAuthSection() {
     mainApp.classList.add('hidden');
     authSection.classList.remove('hidden');
-    emailInput.value = '';
-    passwordInput.value = '';
+    emailInput.value = ''; passwordInput.value = '';
 }
 
-// Initialize
-checkSession();
-
-// --- Navigation Logic Enhancement ---
 function navigate(tabName, element) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    
-    if(tabName !== 'add') {
-        element.classList.add('active');
-    }
+    if(tabName !== 'add') element.classList.add('active');
 
-    // Hide all views
     document.querySelectorAll('.view-section').forEach(view => view.classList.add('hidden'));
     
-    // Show selected view
     const selectedView = document.getElementById(`view-${tabName}`);
-    if(selectedView) {
-        selectedView.classList.remove('hidden');
+    if(selectedView) selectedView.classList.remove('hidden');
+
+    if(tabName === 'home') fetchPosts();
+    if(tabName === 'profile') fetchProfile();
+}
+
+// --- Profile Logic ---
+async function fetchProfile() {
+    if (!currentUser) return;
+    
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+    if (data) {
+        userProfile = data;
+        updateProfileUI();
+    } else if (error && error.code === 'PGRST116') {
+        // Create default profile if missing
+        const newProfile = { id: currentUser.id, username: 'User_' + Math.floor(Math.random() * 1000) };
+        await supabase.from('profiles').insert([newProfile]);
+        userProfile = newProfile;
+        updateProfileUI();
+    }
+}
+
+function updateProfileUI() {
+    document.getElementById('profile-name').innerText = userProfile.username || 'Anonymous';
+    document.getElementById('profile-bio').innerText = userProfile.bio || 'No bio yet.';
+    if (userProfile.avatar_url) {
+        document.getElementById('profile-img').src = userProfile.avatar_url;
+    }
+}
+
+function openEditProfile() {
+    document.getElementById('edit-username').value = userProfile.username || '';
+    document.getElementById('edit-bio').value = userProfile.bio || '';
+    document.getElementById('edit-profile-modal').classList.remove('hidden');
+}
+
+function closeEditProfile() {
+    document.getElementById('edit-profile-modal').classList.add('hidden');
+}
+
+async function saveProfile() {
+    const newName = document.getElementById('edit-username').value.trim();
+    const newBio = document.getElementById('edit-bio').value.trim();
+
+    const { error } = await supabase.from('profiles').upsert({ 
+        id: currentUser.id, 
+        username: newName, 
+        bio: newBio 
+    });
+
+    if (error) {
+        alert("Error saving profile: " + error.message);
+    } else {
+        userProfile.username = newName;
+        userProfile.bio = newBio;
+        updateProfileUI();
+        closeEditProfile();
+        fetchPosts(); 
+    }
+}
+
+async function uploadAvatar(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    document.getElementById('profile-name').innerText = "Uploading...";
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
+
+    if (uploadError) {
+        alert("Upload failed: " + uploadError.message);
+        updateProfileUI(); 
+        return;
     }
 
-    // If navigating to home, refresh posts
-    if(tabName === 'home') {
+    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+    const publicUrl = publicUrlData.publicUrl;
+
+    const { error: updateError } = await supabase.from('profiles').upsert({ 
+        id: currentUser.id, 
+        avatar_url: publicUrl 
+    });
+
+    if (!updateError) {
+        userProfile.avatar_url = publicUrl;
+        updateProfileUI();
         fetchPosts();
     }
 }
 
-// --- Posts CRUD Logic ---
-let currentUser = null;
-
-// Listen to auth state to grab user ID
-supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-        currentUser = session.user;
-        fetchPosts(); // Fetch posts when logged in
-    } else {
-        currentUser = null;
-    }
-});
-
-// Fetch posts from Supabase
+// --- Posts Logic ---
 async function fetchPosts() {
     const container = document.getElementById('posts-container');
     
     const { data: posts, error } = await supabase
         .from('posts')
-        .select('*')
+        .select(`*, profiles (username, avatar_url)`)
         .order('created_at', { ascending: false });
 
     if (error) {
-        console.error("Error fetching posts:", error);
         container.innerHTML = `<p class="error-msg">Failed to load posts.</p>`;
         return;
     }
@@ -172,63 +222,48 @@ async function fetchPosts() {
         return;
     }
 
-    container.innerHTML = ''; // Clear loading text
+    container.innerHTML = '';
     
     posts.forEach(post => {
-        // Generating a dummy avatar letter from User ID since we don't have Profiles yet
-        const avatarLetter = "U"; 
+        const authorName = post.profiles?.username || 'Anonymous';
+        const avatarUrl = post.profiles?.avatar_url || 'https://via.placeholder.com/150';
         
         const postElement = document.createElement('div');
         postElement.classList.add('post-card');
         postElement.innerHTML = `
             <div class="post-header">
-                <div class="post-avatar">${avatarLetter}</div>
+                <img src="${avatarUrl}" class="post-avatar">
                 <div class="post-author-info">
-                    <span class="post-author-name">User <i class="fas fa-check-circle verified-badge"></i></span>
+                    <span class="post-author-name">${authorName} <i class="fas fa-check-circle verified-badge"></i></span>
                     <span class="post-time">${new Date(post.created_at).toLocaleDateString()} - ${post.category || 'Mengineyo'}</span>
                 </div>
             </div>
-            <div class="post-body">
-                ${post.content}
-            </div>
+            <div class="post-body">${post.content}</div>
             <div class="post-actions">
                 <button class="action-btn"><i class="fas fa-heart"></i> Like</button>
                 <button class="action-btn"><i class="fas fa-comment"></i> 0</button>
-                <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content}')"><i class="fas fa-copy"></i> Copy</button>
+                <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i> Copy</button>
             </div>
         `;
         container.appendChild(postElement);
     });
 }
 
-// Submit a new post
 async function submitPost() {
-    if (!currentUser) {
-        alert("You must be logged in to post.");
-        return;
-    }
+    if (!currentUser) return alert("You must be logged in to post.");
 
     const category = document.getElementById('post-category').value;
     const content = document.getElementById('post-content').value.trim();
     const submitBtn = document.getElementById('submit-post-btn');
 
-    if (!category || !content) {
-        alert("Please select a category and write a message.");
-        return;
-    }
+    if (!category || !content) return alert("Please select a category and write a message.");
 
     submitBtn.innerText = "Posting...";
     submitBtn.disabled = true;
 
-    const { error } = await supabase
-        .from('posts')
-        .insert([
-            { 
-                user_id: currentUser.id, 
-                content: content, 
-                category: category 
-            }
-        ]);
+    const { error } = await supabase.from('posts').insert([
+        { user_id: currentUser.id, content: content, category: category }
+    ]);
 
     submitBtn.innerText = "Post Message";
     submitBtn.disabled = false;
@@ -236,11 +271,12 @@ async function submitPost() {
     if (error) {
         alert("Error posting: " + error.message);
     } else {
-        // Clear form and go back to home feed
         document.getElementById('post-category').value = '';
         document.getElementById('post-content').value = '';
-        
         const homeTab = document.querySelector('.nav-item i.fa-home').parentElement;
         navigate('home', homeTab);
     }
 }
+
+// Boot up
+checkSession();
