@@ -72,91 +72,70 @@ const translations = {
 
 let currentLang = 'sw'; // Default language
 
-function setLanguage(lang) {
+// Function to handle language switching safely
+window.setLanguage = function(lang) {
     currentLang = lang;
     
-    // Update active button state
-    document.getElementById('btn-sw').classList.remove('active');
-    document.getElementById('btn-en').classList.remove('active');
-    document.getElementById(`btn-${lang}`).classList.add('active');
+    // Update active button state safely
+    const btnSw = document.getElementById('btn-sw');
+    const btnEn = document.getElementById('btn-en');
+    
+    if (btnSw && btnEn) {
+        btnSw.classList.remove('active');
+        btnEn.classList.remove('active');
+        document.getElementById(`btn-${lang}`).classList.add('active');
+    }
 
     // Update all text elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (translations[lang][key]) {
+        if (translations[lang] && translations[lang][key]) {
             element.innerText = translations[lang][key];
         }
     });
 
-    // Update Placeholders
-    document.getElementById('email').placeholder = translations[lang].emailPlaceholder;
-    document.getElementById('password').placeholder = translations[lang].passwordPlaceholder;
-    document.getElementById('post-content').placeholder = (lang === 'sw') ? "Andika hapa..." : "Write here...";
-}
+    // Update Placeholders safely
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const postContent = document.getElementById('post-content');
 
-// 1. Initialize Supabase
-const supabaseUrl = 'https://wwavdbfibzbjsnnavvfj.supabase.co';
-const supabaseKey = 'sb_publishable_L1DxHGDmy2E8YVQDa3-M_g_Us4QmJQ7';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    if (emailInput) emailInput.placeholder = translations[lang].emailPlaceholder;
+    if (passInput) passInput.placeholder = translations[lang].passwordPlaceholder;
+    if (postContent) postContent.placeholder = (lang === 'sw') ? "Andika hapa..." : "Write here...";
+};
 
-// State Variables
+// --- Initialization Variables ---
+let supabase;
 let isLoginMode = true;
 let currentUser = null;
 let userProfile = { username: 'Anonymous', bio: '', avatar_url: 'https://via.placeholder.com/150' };
 
-// DOM Elements
-const landingSection = document.getElementById('landing-section');
-const authSection = document.getElementById('auth-section');
-const mainApp = document.getElementById('main-app');
-const authTitle = document.getElementById('auth-title');
-const authBtn = document.getElementById('auth-btn');
-const toggleText = document.getElementById('toggle-text');
-const toggleLink = document.getElementById('toggle-link');
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const errorMsg = document.getElementById('auth-error');
-
-// --- Initialization & Auth ---
-async function checkSession() {
-    setLanguage('sw'); // Apply default language on load
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-        handleSessionState(session);
-    } else {
-        // Show landing page if not logged in
-        landingSection.classList.remove('hidden');
-        authSection.classList.add('hidden');
-        mainApp.classList.add('hidden');
-    }
-
-    supabase.auth.onAuthStateChange((event, session) => {
-        handleSessionState(session);
-    });
+// Initialize Supabase safely
+try {
+    const supabaseUrl = 'https://wwavdbfibzbjsnnavvfj.supabase.co';
+    const supabaseKey = 'sb_publishable_L1DxHGDmy2E8YVQDa3-M_g_Us4QmJQ7';
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+} catch (error) {
+    console.error("Supabase Connection Error:", error);
+    alert("Kuna shida ya kuunganisha na Database. Hakikisha una internet.");
 }
 
-function handleSessionState(session) {
-    if (session) {
-        currentUser = session.user;
-        landingSection.classList.add('hidden');
-        authSection.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        fetchProfile(); 
-        fetchPosts();   
-    } else {
-        currentUser = null;
-    }
-}
+// --- Auth UI Toggling ---
+window.showAuthSection = function() {
+    document.getElementById('landing-section').classList.add('hidden');
+    document.getElementById('auth-section').classList.remove('hidden');
+};
 
-function showAuthSection() {
-    landingSection.classList.add('hidden');
-    authSection.classList.remove('hidden');
-}
-
-function toggleAuthMode() {
+window.toggleAuthMode = function() {
     isLoginMode = !isLoginMode;
-    errorMsg.innerText = ''; 
+    const errorMsg = document.getElementById('auth-error');
+    if (errorMsg) errorMsg.innerText = ''; 
     
+    const authTitle = document.getElementById('auth-title');
+    const authBtn = document.getElementById('auth-btn');
+    const toggleText = document.getElementById('toggle-text');
+    const toggleLink = document.getElementById('toggle-link');
+
     if (isLoginMode) {
         authTitle.innerText = translations[currentLang].loginTitle;
         authBtn.innerText = translations[currentLang].loginBtn;
@@ -168,9 +147,14 @@ function toggleAuthMode() {
         toggleText.innerText = translations[currentLang].toggleToLoginText;
         toggleLink.innerText = translations[currentLang].toggleToLoginLink;
     }
-}
+};
 
-async function handleAuth() {
+window.handleAuth = async function() {
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const errorMsg = document.getElementById('auth-error');
+    const authBtn = document.getElementById('auth-btn');
+
     const email = emailInput.value.trim();
     const password = passwordInput.value;
     errorMsg.innerText = '';
@@ -187,35 +171,65 @@ async function handleAuth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) errorMsg.innerText = error.message;
     } else {
-        // Sign up logic fix
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
             errorMsg.innerText = error.message;
         } else {
             const successMsg = (currentLang === 'sw') ? 'Akaunti imetengenezwa! Unaingia...' : 'Account created! Logging in...';
             alert(successMsg);
-            
-            // Auto login if email confirmation is off in Supabase
             if (data.session) {
                 handleSessionState(data.session);
             } else {
-                errorMsg.innerText = (currentLang === 'sw') ? 'Tafadhali thibitisha barua pepe yako (Check email).' : 'Please verify your email address.';
+                errorMsg.innerText = (currentLang === 'sw') ? 'Thibitisha email yako.' : 'Please verify your email.';
             }
         }
     }
     
     authBtn.innerText = isLoginMode ? translations[currentLang].loginBtn : translations[currentLang].signupBtn;
     authBtn.disabled = false;
+};
+
+window.logout = async function() {
+    await supabase.auth.signOut();
+    document.getElementById('main-app').classList.add('hidden');
+    document.getElementById('landing-section').classList.remove('hidden');
+};
+
+// --- Session Handling ---
+function handleSessionState(session) {
+    if (session) {
+        currentUser = session.user;
+        document.getElementById('landing-section').classList.add('hidden');
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        fetchProfile(); 
+        fetchPosts();   
+    } else {
+        currentUser = null;
+        document.getElementById('main-app').classList.add('hidden');
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('landing-section').classList.remove('hidden');
+    }
 }
 
-async function logout() {
-    await supabase.auth.signOut();
-    mainApp.classList.add('hidden');
-    landingSection.classList.remove('hidden');
-}
+// Ensure DOM is fully loaded before checking session or applying language
+document.addEventListener("DOMContentLoaded", async () => {
+    // 1. Set Default Language Safely
+    setLanguage('sw');
+
+    // 2. Check User Session
+    if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        handleSessionState(session);
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            handleSessionState(session);
+        });
+    }
+});
 
 // --- Navigation ---
-function navigate(tabName, element) {
+window.navigate = function(tabName, element) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     if(tabName !== 'add') element.classList.add('active');
 
@@ -226,23 +240,18 @@ function navigate(tabName, element) {
 
     if(tabName === 'home') fetchPosts();
     if(tabName === 'profile') fetchProfile();
-}
+};
 
-// --- Profile Logic ---
+// --- Profile & Database Logic ---
 async function fetchProfile() {
     if (!currentUser) return;
-    
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
 
     if (data) {
         userProfile = data;
         updateProfileUI();
     } else if (error && error.code === 'PGRST116') {
-        const newProfile = { id: currentUser.id, username: 'User_' + Math.floor(Math.random() * 1000) };
+        const newProfile = { id: currentUser.id, username: 'User_' + Math.floor(Math.random() * 100) };
         await supabase.from('profiles').insert([newProfile]);
         userProfile = newProfile;
         updateProfileUI();
@@ -257,38 +266,31 @@ function updateProfileUI() {
     }
 }
 
-function openEditProfile() {
+window.openEditProfile = function() {
     document.getElementById('edit-username').value = userProfile.username || '';
     document.getElementById('edit-bio').value = userProfile.bio || '';
     document.getElementById('edit-profile-modal').classList.remove('hidden');
-}
+};
 
-function closeEditProfile() {
+window.closeEditProfile = function() {
     document.getElementById('edit-profile-modal').classList.add('hidden');
-}
+};
 
-async function saveProfile() {
+window.saveProfile = async function() {
     const newName = document.getElementById('edit-username').value.trim();
     const newBio = document.getElementById('edit-bio').value.trim();
 
-    const { error } = await supabase.from('profiles').upsert({ 
-        id: currentUser.id, 
-        username: newName, 
-        bio: newBio 
-    });
-
-    if (error) {
-        alert("Error saving profile: " + error.message);
-    } else {
+    const { error } = await supabase.from('profiles').upsert({ id: currentUser.id, username: newName, bio: newBio });
+    if (!error) {
         userProfile.username = newName;
         userProfile.bio = newBio;
         updateProfileUI();
         closeEditProfile();
         fetchPosts(); 
     }
-}
+};
 
-async function uploadAvatar(event) {
+window.uploadAvatar = async function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -297,41 +299,23 @@ async function uploadAvatar(event) {
     const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
-
-    if (uploadError) {
-        alert("Upload failed: " + uploadError.message);
-        updateProfileUI(); 
-        return;
-    }
+    if (uploadError) return updateProfileUI(); 
 
     const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
-    const publicUrl = publicUrlData.publicUrl;
-
-    const { error: updateError } = await supabase.from('profiles').upsert({ 
-        id: currentUser.id, 
-        avatar_url: publicUrl 
-    });
+    const { error: updateError } = await supabase.from('profiles').upsert({ id: currentUser.id, avatar_url: publicUrlData.publicUrl });
 
     if (!updateError) {
-        userProfile.avatar_url = publicUrl;
+        userProfile.avatar_url = publicUrlData.publicUrl;
         updateProfileUI();
         fetchPosts();
     }
-}
+};
 
-// --- Posts Logic ---
 async function fetchPosts() {
     const container = document.getElementById('posts-container');
-    
-    const { data: posts, error } = await supabase
-        .from('posts')
-        .select(`*, profiles (username, avatar_url)`)
-        .order('created_at', { ascending: false });
+    const { data: posts, error } = await supabase.from('posts').select(`*, profiles (username, avatar_url)`).order('created_at', { ascending: false });
 
-    if (error) {
-        container.innerHTML = `<p class="error-msg">Failed to load.</p>`;
-        return;
-    }
+    if (error || !posts) return;
 
     if (posts.length === 0) {
         container.innerHTML = `<p class="temp-text">${translations[currentLang].noPosts}</p>`;
@@ -339,7 +323,6 @@ async function fetchPosts() {
     }
 
     container.innerHTML = '';
-    
     posts.forEach(post => {
         const authorName = post.profiles?.username || 'Anonymous';
         const avatarUrl = post.profiles?.avatar_url || 'https://via.placeholder.com/150';
@@ -351,13 +334,12 @@ async function fetchPosts() {
                 <img src="${avatarUrl}" class="post-avatar">
                 <div class="post-author-info">
                     <span class="post-author-name">${authorName} <i class="fas fa-check-circle verified-badge"></i></span>
-                    <span class="post-time">${new Date(post.created_at).toLocaleDateString()} - ${post.category || 'Mengineyo'}</span>
+                    <span class="post-time">${new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
             </div>
             <div class="post-body">${post.content}</div>
             <div class="post-actions">
                 <button class="action-btn"><i class="fas fa-heart"></i></button>
-                <button class="action-btn"><i class="fas fa-comment"></i></button>
                 <button class="action-btn" onclick="navigator.clipboard.writeText('${post.content.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>
             </div>
         `;
@@ -365,9 +347,8 @@ async function fetchPosts() {
     });
 }
 
-async function submitPost() {
+window.submitPost = async function() {
     if (!currentUser) return;
-
     const category = document.getElementById('post-category').value;
     const content = document.getElementById('post-content').value.trim();
     const submitBtn = document.getElementById('submit-post-btn');
@@ -377,9 +358,7 @@ async function submitPost() {
     submitBtn.innerText = translations[currentLang].authProcessing;
     submitBtn.disabled = true;
 
-    const { error } = await supabase.from('posts').insert([
-        { user_id: currentUser.id, content: content, category: category }
-    ]);
+    const { error } = await supabase.from('posts').insert([{ user_id: currentUser.id, content: content, category: category }]);
 
     submitBtn.innerText = translations[currentLang].postMessageBtn;
     submitBtn.disabled = false;
@@ -388,9 +367,6 @@ async function submitPost() {
         document.getElementById('post-category').value = '';
         document.getElementById('post-content').value = '';
         const homeTab = document.querySelector('.nav-item i.fa-home').parentElement;
-        navigate('home', homeTab);
+        window.navigate('home', homeTab);
     }
-}
-
-// Boot up
-checkSession();
+};
