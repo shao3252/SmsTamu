@@ -28,9 +28,31 @@
         </header>
 
         <main id="content-area">
-            <div style="text-align: center; color: var(--text-muted); margin-top: 50px;">
-                <h3>Welcome to Sms Tamu!</h3>
-                <p>You have successfully logged in.</p>
+            <div id="view-home" class="view-section">
+                <div id="posts-container">
+                    <p style="text-align: center; color: var(--text-muted); margin-top: 20px;">Loading posts...</p>
+                </div>
+            </div>
+
+            <div id="view-add" class="view-section hidden">
+                <div class="add-post-card">
+                    <h2>Write Message</h2>
+                    <select id="post-category" class="custom-input">
+                        <option value="" disabled selected>Select Category...</option>
+                        <option value="Kuomba Msamaha">Kuomba Msamaha</option>
+                        <option value="Kusifia">Kusifia</option>
+                        <option value="Kuvutia">Kuvutia</option>
+                        <option value="Mengineyo">Mengineyo</option>
+                    </select>
+                    <textarea id="post-content" class="custom-input" rows="5" placeholder="Write your sweet message here..."></textarea>
+                    <button id="submit-post-btn" onclick="submitPost()">Post Message</button>
+                </div>
+            </div>
+            
+            <div id="view-search" class="view-section hidden"><h3 class="temp-text">Search coming soon...</h3></div>
+            <div id="view-chat" class="view-section hidden"><h3 class="temp-text">Chat coming soon...</h3></div>
+            <div id="view-profile" class="view-section hidden">
+                <h3 class="temp-text">Profile coming soon...</h3>
                 <button onclick="logout()" class="logout-btn">Logout</button>
             </div>
         </main>
